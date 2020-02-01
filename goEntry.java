@@ -1,38 +1,28 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class goEntry {
     public String id;
     public String name;
     public String namespace;
-    public boolean isTrue;
+    public boolean isEnriched;
     public boolean root;
     public boolean isObsolete;
 
     public ArrayList<String> parents;
     public ArrayList<String> genes;
-    public HashMap<String, goEntry> mapOfGOs;
 
-    public HashMap<String, goEntry> getMapOfGOs() {
-        return mapOfGOs;
+    public HashSet<Gene> genesSet;
+
+    public HashSet<Gene> getGenesSet() {
+        return genesSet;
     }
 
-    public void setMapOfGOs(HashMap<String, goEntry> mapOfGOs) {
-        this.mapOfGOs = mapOfGOs;
+    public void setGenesSet(HashSet<Gene> genesSet) {
+        this.genesSet = genesSet;
     }
 
-    public goEntry() {
-    }
-
-    /*public goEntry(String id, String name, String namespace, boolean isTrue, boolean root, ArrayList<goEntry> parents, ArrayList<String> genes) {
-        this.id = id;
-        this.name = name;
-        this.namespace = namespace;
-        this.isTrue = isTrue;
-        this.root = root;
-        this.parents = parents;
-        this.genes = genes;
-    }*/
 
     public String getId() {
         return id;
@@ -58,12 +48,12 @@ public class goEntry {
         this.namespace = namespace;
     }
 
-    public boolean isTrue() {
-        return isTrue;
+    public boolean isEnriched() {
+        return isEnriched;
     }
 
-    public void setTrue(boolean aTrue) {
-        isTrue = aTrue;
+    public void setEnriched(boolean enriched) {
+        isEnriched = enriched;
     }
 
     public boolean isRoot() {
@@ -104,11 +94,12 @@ public class goEntry {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", namespace='" + namespace + '\'' +
-                ", isTrue=" + isTrue +
+                ", isEnriched=" + isEnriched +
                 ", root=" + root +
                 ", isObsolete=" + isObsolete +
                 ", parents=" + parents +
                 ", genes=" + genes +
+                ", genesSet=" + genesSet +
                 '}';
     }
 }
