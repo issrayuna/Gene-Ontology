@@ -1,16 +1,119 @@
-import it.unimi.dsi.fastutil.floats.Float2ObjectRBTreeMap;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 public class reader {
-    //public ArrayList<goEntry> goEntries; //String id
+
+    HashMap<String, goEntry> biological_process;
+    HashMap<String, goEntry> cellular_component;
+    HashMap<String, goEntry> molecular_function;
+
+    public HashMap<String, goEntry> getBiological_process() {
+        return biological_process;
+    }
+
+    public void setBiological_process(HashMap<String, goEntry> biological_process) {
+        this.biological_process = biological_process;
+    }
+
+    public HashMap<String, goEntry> getCellular_component() {
+        return cellular_component;
+    }
+
+    public void setCellular_component(HashMap<String, goEntry> cellular_component) {
+        this.cellular_component = cellular_component;
+    }
+
+    public HashMap<String, goEntry> getMolecular_function() {
+        return molecular_function;
+    }
+
+    public void setMolecular_function(HashMap<String, goEntry> molecular_function) {
+        this.molecular_function = molecular_function;
+    }
+
+    //TODO check (x) finished (x)
+    public static ArrayList<HashMap<String, goEntry>> generateRootMapsFromOneMap(HashMap<String, goEntry> mapVON) {
+        //reader r = new reader();
+        ArrayList<HashMap<String, goEntry>> rere = new ArrayList<>();
+        HashMap<String, goEntry> biological_process = new HashMap<>();
+        HashMap<String, goEntry> cellular_component = new HashMap<>();
+        HashMap<String, goEntry> molecular_function = new HashMap<>();
+
+        for (String goID : mapVON.keySet()) {
+            goEntry goEntry = mapVON.get(goID);
+            if (goEntry.getParents().isEmpty()) {
+                goEntry.setRoot(true);
+            }
+            switch (goEntry.getNamespace()) {
+                case "biological_process":
+                    biological_process.put(goID, goEntry);
+                    break;
+                case "cellular_component":
+                    cellular_component.put(goID, goEntry);
+                    break;
+                case "molecular_function":
+                    molecular_function.put(goID, goEntry);
+                    break;
+            }
+        }
+        rere.add(biological_process);
+        rere.add(cellular_component);
+        rere.add(molecular_function);
+        return rere;
+        //r.setBiological_process(biological_process);
+        //r.setCellular_component(cellular_component);
+        //r.setMolecular_function(molecular_function);
+    }
+
+
+    //TODO check () finished ()
+    public static ArrayList<GenesWithGoList> generateGeneListFromGafGO(String goOptionPath) throws IOException {//TODO ArrayList<GenesWithGoList> instead of void
+        //GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(goOptionPath));
+        HashMap<String, ArrayList<String>> genesWithGoList = new HashMap<>();
+        ArrayList<GenesWithGoList> genes = new ArrayList<>();
+
+        InputStream gzipStream = new GZIPInputStream(new FileInputStream(goOptionPath));
+        BufferedReader br = new BufferedReader(new InputStreamReader(gzipStream));
+        String line;
+
+        try {
+            String geneID, goID;
+
+            while ((line = br.readLine()) != null) {
+
+                if (!line.startsWith("!")) {
+                    String[] cols = line.split("\t");
+                    geneID = cols[2];
+                    goID = cols[4];
+                    if (!genesWithGoList.containsKey(geneID)) {
+                        ArrayList<String> gos = new ArrayList<>();
+                        gos.add(goID);
+                        genesWithGoList.put(geneID, gos);
+                    } else if (genesWithGoList.containsKey(geneID)) {
+                        ArrayList<String> gos = genesWithGoList.get(geneID);
+                        gos.add(goID);
+                        genesWithGoList.put(geneID, gos);
+                    }
+                }
+
+            }
+            gzipStream.close();
+
+            for (String geneId : genesWithGoList.keySet()) {
+                GenesWithGoList genesWithGoList1 = new GenesWithGoList(geneId, genesWithGoList.get(geneId));
+                genes.add(genesWithGoList1);
+            }
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+
+        return genes;
+    }
 
 
     //TODO check (x) finished (x)
@@ -75,7 +178,7 @@ public class reader {
                 if (line.startsWith("ENSG")) {
                     String[] cols = line.split("\t");
                     String[] gos = cols[2].split("\\|");
-                    genes.add(new GenesWithGoList(cols[0], new ArrayList<>(Arrays.asList(gos))));//geneID, listOfGOs
+                    genes.add(new GenesWithGoList(cols[1], new ArrayList<>(Arrays.asList(gos))));//geneID [hgnc], listOfGOs
                 }
             }
         } catch (IOException ioe) {
@@ -87,17 +190,14 @@ public class reader {
     //TODO check (x) finished (x)
     public static HashMap<String, goEntry> addGenesToGoEntries(ArrayList<goEntry> goEntriesZU, HashMap<String, ArrayList<String>> gosWithGenesListVON) {
         HashMap<String, goEntry> mapZU = listToHashmap(goEntriesZU);
-        int containsNum = 0;
+
         for (String goID1 : gosWithGenesListVON.keySet()) {
             ArrayList<String> genes1 = gosWithGenesListVON.get(goID1);
 
             if (mapZU.containsKey(goID1)) {
                 goEntry goEntry = mapZU.get(goID1);
-                //add list of genes to map.goEntry Object
                 goEntry.setGenes(genes1);
-                //update map.goEntry
                 mapZU.put(goID1, goEntry);
-                containsNum++;
             }
         }
 //        System.out.println("containsNum: " + containsNum);
@@ -140,31 +240,42 @@ public class reader {
     }
 
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         String path = "/home/issra/Desktop/GO_Files/go.obo";
         ArrayList<goEntry> goEntries = generateGoEntriesFromOboFile(path);
-        goEntries = removeObsolete(goEntries);//! main hashmap
+        goEntries = removeObsolete(goEntries);
         String ensemblPath = "/home/issra/Schreibtisch/goa_human_ensembl.txt";
         ArrayList<GenesWithGoList> genesWithGoLists = generateGeneListFromEnsembleTsv(ensemblPath);
         HashMap<String, ArrayList<String>> gosWithGenesList = generateGoWithGenesList(genesWithGoLists);
 
-        HashMap<String, goEntry> goEntries1 = addGenesToGoEntries(goEntries, gosWithGenesList);
-        //goEntries1.forEach((key, value) -> System.out.println(key + " " + value));
+        HashMap<String, goEntry> goEntries1 = addGenesToGoEntries(goEntries, gosWithGenesList);//! TODO main hashmap
+        ArrayList<HashMap<String, goEntry>> r = generateRootMapsFromOneMap(goEntries1);
+        HashMap<String, goEntry> rootMapBiol = r.get(0);
+        HashMap<String, goEntry> rootMapCell = r.get(1);
+        HashMap<String, goEntry> rootMapMol = r.get(2);
 
+        String gafPath = "/home/issra/Schreibtisch/goa_human.gaf.gz";
+        ArrayList<GenesWithGoList> genes = generateGeneListFromGafGO(gafPath);
+        for (int i = 0; i < genes.size(); i++) {
+            System.out.println(genes.get(i).toString());
+        }
     }
-/*private HashMap<String, ArrayList<String>> gosWithGenesList = new HashMap<>();
 
-for (String name: gosWithGenesList.keySet()){
-            String key = name.toString();
-            String value = gosWithGenesList.get(name).toString();
-            System.out.println(key + " " + value);
-}
+/*TODO how to print out a HashMap
+private HashMap<String, ArrayList<String>> gosWithGenesList = new HashMap<>();
 
-Update for Java8:
-
- gosWithGenesList.entrySet().forEach(entry->{
+goEntries1.forEach((key, value) -> System.out.println(key + " " + value));
+    OR
+gosWithGenesList.entrySet().forEach(entry->{
     System.out.println(entry.getKey() + " " + entry.getValue());
  });
 */
 
 }
+
+
+
+
+
+
+
