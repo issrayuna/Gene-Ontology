@@ -7,7 +7,7 @@ public class runGO {
         Option obo = new Option("obo", "obo", true, "obo file path");
         Option root = new Option("root", "root", true, "specifiy which namespace to use");
         Option mapping = new Option("mapping", "mapping", true, "mapping file path");
-        Option mappingtype = new Option("mapping", "mapping", true, "mappingtype: ensemble or go");
+        Option mappingtype = new Option("mappingtype", "mappingtype", true, "mappingtype: ensemble or go");
         Option overlapout = new Option("overlapout", "overlapout", true, "output of ");
         Option enrich = new Option("enrich", "enrich", true, "simulation file path for enrichment analysis");
         Option minsize = new Option("minsize", "minsize", true, "minimal number of overlapping genes");
@@ -41,6 +41,20 @@ public class runGO {
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
             String oboPath = cmd.getOptionValue("obo");
+            String rootOpt = cmd.getOptionValue("root");
+            String mappingFilePath = cmd.getOptionValue("mapping");
+            String mappingType = cmd.getOptionValue("mappingtype");
+            int overlapOut = Integer.parseInt(cmd.getOptionValue("overlapout"));
+            String enrichFile = cmd.getOptionValue("enrich");
+            int minSize = Integer.parseInt(cmd.getOptionValue("minsize"));
+            int maxSize = Integer.parseInt(cmd.getOptionValue("maxsize"));
+            String outPath = cmd.getOptionValue("o");
+
+
+
+
+
+
 
 
 

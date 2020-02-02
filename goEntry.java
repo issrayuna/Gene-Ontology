@@ -1,6 +1,6 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class goEntry {
     public String id;
@@ -11,7 +11,6 @@ public class goEntry {
     public boolean isObsolete;
 
     public ArrayList<String> parents;
-    public ArrayList<String> genes;
 
     public HashSet<Gene> genesSet;
 
@@ -22,7 +21,6 @@ public class goEntry {
     public void setGenesSet(HashSet<Gene> genesSet) {
         this.genesSet = genesSet;
     }
-
 
     public String getId() {
         return id;
@@ -72,20 +70,25 @@ public class goEntry {
         this.parents = parents;
     }
 
-    public ArrayList<String> getGenes() {
-        return genes;
-    }
-
-    public void setGenes(ArrayList<String> genes) {
-        this.genes = genes;
-    }
-
     public boolean isObsolete() {
         return isObsolete;
     }
 
     public void setObsolete(boolean obsolete) {
         isObsolete = obsolete;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof goEntry)) return false;
+        goEntry goEntry = (goEntry) o;
+        return getId().equals(goEntry.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 
     @Override
@@ -98,7 +101,6 @@ public class goEntry {
                 ", root=" + root +
                 ", isObsolete=" + isObsolete +
                 ", parents=" + parents +
-                ", genes=" + genes +
                 ", genesSet=" + genesSet +
                 '}';
     }

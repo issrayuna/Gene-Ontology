@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Objects;
 
 public class Gene {
     public String id;
@@ -7,6 +8,21 @@ public class Gene {
 
     public HashSet<String> goEntryHashSet;
 
+    public Gene(String id, double fc, boolean signif) {
+        this.id = id;
+        this.fc = fc;
+        this.signif = signif;
+    }
+
+    public Gene() {
+    }
+
+    public Gene(String id, double fc, boolean signif, HashSet<String> goEntryHashSet) {
+        this.id = id;
+        this.fc = fc;
+        this.signif = signif;
+        this.goEntryHashSet = goEntryHashSet;
+    }
 
     public HashSet<String> getGoEntryHashSet() {
         return goEntryHashSet;
@@ -39,4 +55,29 @@ public class Gene {
     public void setSignif(boolean signif) {
         this.signif = signif;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Gene)) return false;
+        Gene gene = (Gene) o;
+        return id.equals(gene.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Gene{" +
+                "id='" + id + '\'' +
+                ", fc=" + fc +
+                ", signif=" + signif +
+                ", goEntryHashSet=" + goEntryHashSet +
+                '}';
+    }
+
+
 }
