@@ -1,5 +1,7 @@
 import org.apache.commons.cli.*;
 
+import java.io.IOException;
+
 
 public class runGO {
 
@@ -44,21 +46,17 @@ public class runGO {
             String rootOpt = cmd.getOptionValue("root");
             String mappingFilePath = cmd.getOptionValue("mapping");
             String mappingType = cmd.getOptionValue("mappingtype");
-            int overlapOut = Integer.parseInt(cmd.getOptionValue("overlapout"));
+            String overlapOut = cmd.getOptionValue("overlapout");
             String enrichFile = cmd.getOptionValue("enrich");
             int minSize = Integer.parseInt(cmd.getOptionValue("minsize"));
             int maxSize = Integer.parseInt(cmd.getOptionValue("maxsize"));
             String outPath = cmd.getOptionValue("o");
 
 
+            reader.runOverlap(oboPath, mappingFilePath, mappingType, rootOpt, enrichFile, minSize, maxSize, overlapOut);
 
 
-
-
-
-
-
-        } catch (ParseException pe) {
+        } catch (ParseException | IOException pe) {
             pe.printStackTrace();
         }
 

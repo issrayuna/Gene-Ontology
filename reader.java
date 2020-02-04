@@ -1,8 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class reader {
@@ -14,7 +11,7 @@ public class reader {
         HashMap<String, goEntry> biological_process = new HashMap<>();
         HashMap<String, goEntry> cellular_component = new HashMap<>();
         HashMap<String, goEntry> molecular_function = new HashMap<>();
-
+        int n = 0;
         for (String goID : mapVON.keySet()) {
             goEntry goEntry = mapVON.get(goID);
             if (goEntry.getParents().isEmpty()) {
@@ -22,12 +19,18 @@ public class reader {
             }
             switch (goEntry.getNamespace()) {
                 case "biological_process":
+                    n = calcNumOfMeasuredGenes(goEntry);
+                    goEntry.setMeasuredGenesSize(n);
                     biological_process.put(goID, goEntry);
                     break;
                 case "cellular_component":
+                    n = calcNumOfMeasuredGenes(goEntry);
+                    goEntry.setMeasuredGenesSize(n);
                     cellular_component.put(goID, goEntry);
                     break;
                 case "molecular_function":
+                    n = calcNumOfMeasuredGenes(goEntry);
+                    goEntry.setMeasuredGenesSize(n);
                     molecular_function.put(goID, goEntry);
                     break;
             }
@@ -41,12 +44,27 @@ public class reader {
         //r.setMolecular_function(molecular_function);
     }
 
+    //TODO check () finished (x)
+    public static int calcNumOfMeasuredGenes(goEntry goEntry) {
+        int sum = 0;
+        if (goEntry.getGenesSet() != null) {
+            for (Gene g : goEntry.getGenesSet()) {
+                if (g.getFc() != 0) {
+                    sum++;
+                }
+            }
+        }
+        return sum;
+    }
+
+
     //TODO check (x) finished (x)
     public static Gene retGeneWithSameId(HashSet<Gene> geneSet, String id) {
-        if (geneSet.stream().filter(x -> x.getId().equals(id)).findFirst().isPresent())
+        if (geneSet.stream().filter(x -> x.getId().equals(id)).findFirst().isPresent()) {
             return geneSet.stream().filter(x -> x.getId().equals(id)).findFirst().get();
-        else
+        } else {
             return null;
+        }
     }
 
     //TODO check (x) finished (x)
@@ -80,8 +98,10 @@ public class reader {
                 g.setId(geneId);
                 g.setGoEntryHashSet(new HashSet<>(genesWithGoList.get(geneId)));
                 Gene g2 = retGeneWithSameId(genesWithFcSignif, geneId);
-                g.setFc(g2.getFc());
-                g.setSignif(g2.isSignif());
+                if (g2 != null) {
+                    g.setFc(g2.getFc());
+                    g.setSignif(g2.isSignif());
+                }
                 geneSet.add(g);
             }
 
@@ -180,6 +200,16 @@ public class reader {
     }
 
 
+    //TODO check () finished (x)
+    public static int calcNumOfNoverlap(HashSet<Gene> genes) {
+        int sum = 0;
+        for (Gene g : genes) {
+            if (g.isSignif()) sum++;
+        }
+        return sum;
+    }
+
+
     //TODO check (x) finished (x)
     public static HashMap<String, goEntry> addGenesToGoEntries(HashMap<String, goEntry> mapZU, HashMap<String, HashSet<Gene>> gosWithGenesListVON) {
         for (String goID1 : gosWithGenesListVON.keySet()) {
@@ -187,6 +217,7 @@ public class reader {
             if (mapZU.containsKey(goID1)) {
                 goEntry goEntry = mapZU.get(goID1);
                 goEntry.setGenesSet(genes1);
+                goEntry.setNumOfSignificantGenes(calcNumOfNoverlap(genes1));
                 mapZU.put(goID1, goEntry);
             }
         }
@@ -290,21 +321,27 @@ public class reader {
         return mapZU;
     }
 
-    public static void main(String[] args) throws IOException {
-        String oboPath = "/home/issra/Schreibtisch/GOBI/GO_Files/go.obo";
-        String goOrEnsemblPath = "/home/issra/Schreibtisch/GOBI/GO_Files/goa_human_ensembl.tsv";
-        String mappingType = "ensembl";
-        String root = "biological_process";
-        String enrichFilePath = "/home/issra/Schreibtisch/simul_exp_go_bp_ensembl.tsv";
 
-        HashMap<String, goEntry> rootMap = generateRootMapBasedOnMappingType(oboPath, goOrEnsemblPath, mappingType, root, enrichFilePath);
-
-        PrintStream fileOut = new PrintStream("./out.txt");
-        System.setOut(fileOut);
-        rootMap.forEach((key, value) -> System.out.println(key + " " + value));
-
-
+    public static void runOverlap(String oboPath, String
+            mappingFile, String mappingType, String root, String enrichFilePath, int minsize, int maxsize, String overlapout) throws IOException {
+        HashMap<String, goEntry> rootMap = generateRootMapBasedOnMappingType(oboPath, mappingFile, mappingType, root, enrichFilePath);
+        overlap.generateOverlapEntryAndPrint(rootMap, minsize, maxsize, overlapout);
     }
+
+//    public static void main(String[] args) throws IOException {
+//        String oboPath = "/home/issra/Schreibtisch/GOBI/GO_Files/go.obo";
+//        String goOrEnsemblPath = "/home/issra/Schreibtisch/GOBI/GO_Files/goa_human.gaf.gz";
+//        String mappingType = "go";
+//        String root = "biological_process";
+//        String enrichFilePath = "/home/issra/Schreibtisch/simul_exp_go_bp_ensembl.tsv";
+//        String overlapout = "./overlapout.txt";
+//
+//        PrintStream fileOut = new PrintStream("./out.txt");
+//        System.setOut(fileOut);
+
+//
+//
+//    }
 
 /*TODO how to print out a HashMap
 private HashMap<String, ArrayList<String>> gosWithGenesList = new HashMap<>();

@@ -9,6 +9,16 @@ public class goEntry {
     public boolean isEnriched;
     public boolean root;
     public boolean isObsolete;
+    public int measuredGenesSize;//size //TODO ()
+    public int numOfSignificantGenes;//noverlap //TODO (x)
+
+    public void setMeasuredGenesSize(int measuredGenesSize) {
+        this.measuredGenesSize = measuredGenesSize;
+    }
+
+    public void setNumOfSignificantGenes(int numOfSignificantGenes) {
+        this.numOfSignificantGenes = numOfSignificantGenes;
+    }
 
     public ArrayList<String> parents;
 
@@ -30,10 +40,6 @@ public class goEntry {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -46,17 +52,10 @@ public class goEntry {
         this.namespace = namespace;
     }
 
-    public boolean isEnriched() {
-        return isEnriched;
-    }
-
     public void setEnriched(boolean enriched) {
         isEnriched = enriched;
     }
 
-    public boolean isRoot() {
-        return root;
-    }
 
     public void setRoot(boolean root) {
         this.root = root;
@@ -100,6 +99,8 @@ public class goEntry {
                 ", isEnriched=" + isEnriched +
                 ", root=" + root +
                 ", isObsolete=" + isObsolete +
+                ", size=" + measuredGenesSize +
+                ", noverlap=" + numOfSignificantGenes +
                 ", parents=" + parents +
                 ", genesSet=" + genesSet +
                 '}';
