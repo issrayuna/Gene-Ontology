@@ -4,47 +4,26 @@ import java.util.zip.GZIPInputStream;
 
 public class reader {
 
-    //TODO check (x) finished (x)
-    public static ArrayList<HashMap<String, goEntry>> generateRootMapsFromOneMap(HashMap<String, goEntry> mapVON) {
-        //reader r = new reader();
-        ArrayList<HashMap<String, goEntry>> rere = new ArrayList<>();
-        HashMap<String, goEntry> biological_process = new HashMap<>();
-        HashMap<String, goEntry> cellular_component = new HashMap<>();
-        HashMap<String, goEntry> molecular_function = new HashMap<>();
+    //TODO check () finished (x)
+    public static HashMap<String, goEntry> generateRootMap(HashMap<String, goEntry> mapVON, String root) {
+        HashMap<String, goEntry> mapZU = new HashMap<>();
         int n = 0;
         for (String goID : mapVON.keySet()) {
             goEntry goEntry = mapVON.get(goID);
             if (goEntry.getParents().isEmpty()) {
                 goEntry.setRoot(true);
             }
-            switch (goEntry.getNamespace()) {
-                case "biological_process":
-                    n = calcNumOfMeasuredGenes(goEntry);
-                    goEntry.setMeasuredGenesSize(n);
-                    biological_process.put(goID, goEntry);
-                    break;
-                case "cellular_component":
-                    n = calcNumOfMeasuredGenes(goEntry);
-                    goEntry.setMeasuredGenesSize(n);
-                    cellular_component.put(goID, goEntry);
-                    break;
-                case "molecular_function":
-                    n = calcNumOfMeasuredGenes(goEntry);
-                    goEntry.setMeasuredGenesSize(n);
-                    molecular_function.put(goID, goEntry);
-                    break;
+
+            if (goEntry.getNamespace().equals(root)) {
+                n = calcNumOfMeasuredGenes(goEntry);
+                goEntry.setMeasuredGenesSize(n);
+                mapZU.put(goID, goEntry);
             }
         }
-        rere.add(biological_process);
-        rere.add(cellular_component);
-        rere.add(molecular_function);
-        return rere;
-        //r.setBiological_process(biological_process);
-        //r.setCellular_component(cellular_component);
-        //r.setMolecular_function(molecular_function);
+        return mapZU;
     }
 
-    //TODO check () finished (x)
+    //TODO check (x) finished (x)
     public static int calcNumOfMeasuredGenes(goEntry goEntry) {
         int sum = 0;
         if (goEntry.getGenesSet() != null) {
@@ -200,7 +179,7 @@ public class reader {
     }
 
 
-    //TODO check () finished (x)
+    //TODO check (x) finished (x)
     public static int calcNumOfNoverlap(HashSet<Gene> genes) {
         int sum = 0;
         for (Gene g : genes) {
@@ -243,7 +222,7 @@ public class reader {
         return map;
     }
 
-    //TODO check (x) finished (x)
+    //TODO check (x) finished (x) improved () [GENERATE ONLY ONE ROOTMAP FROM THE BEGINNING????????????????? SAVES A LOT OF TIME!!!!!!!!!!!!!!!!]
     public static HashMap<String, goEntry> generateRootMapBasedOnMappingType(String oboPath, String
             mappingFile, String mappingType, String root, String enrichFilePath) throws IOException {
 
@@ -252,8 +231,6 @@ public class reader {
         ArrayList<String> enrichedGOs = (ArrayList<String>) objects.get(0);
         HashSet<Gene> genesWithFcSignif = (HashSet<Gene>) objects.get(1);
 
-
-        HashMap<String, goEntry> rootMap = new HashMap<>();
         HashMap<String, goEntry> goEntries = generateGoEntriesFromOboFile(oboPath, enrichedGOs);
         HashSet<Gene> genesWithGoLists = new HashSet<>();
         if (mappingType.equals("go")) {
@@ -264,17 +241,10 @@ public class reader {
 
         HashMap<String, HashSet<Gene>> gosWithGenesList = generateGoMapWithGeneSet(genesWithGoLists);
         HashMap<String, goEntry> goEntries1 = addGenesToGoEntries(goEntries, gosWithGenesList);
-        ArrayList<HashMap<String, goEntry>> r = generateRootMapsFromOneMap(goEntries1);
-        switch (root) {
-            case "biological_process":
-                return r.get(0);
-            case "cellular_component":
-                return r.get(1);
-            case "molecular_function":
-                r.get(2);
-                break;
-        }
+        HashMap<String, goEntry> rootMap = generateRootMap(goEntries1, root);
+
         rootMap = returnMapWithGeneAsHashSet(rootMap);
+        rootMap = overlap.addChildren(rootMap);
 
 
         return rootMap;

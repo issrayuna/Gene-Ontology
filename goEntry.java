@@ -8,9 +8,27 @@ public class goEntry {
     public String namespace;
     public boolean isEnriched;
     public boolean root;
+    public ArrayList<String> parents;
+    public ArrayList<String> children;
+
+    public HashSet<Gene> genesSet;
     public boolean isObsolete;
     public int measuredGenesSize;//size //TODO ()
     public int numOfSignificantGenes;//noverlap //TODO (x)
+
+
+
+    public ArrayList<String> getChildren() {
+        return children;
+    }
+
+    public void setChildren(ArrayList<String> children) {
+        this.children = children;
+    }
+
+    public boolean isRoot() {
+        return root;
+    }
 
     public void setMeasuredGenesSize(int measuredGenesSize) {
         this.measuredGenesSize = measuredGenesSize;
@@ -19,10 +37,6 @@ public class goEntry {
     public void setNumOfSignificantGenes(int numOfSignificantGenes) {
         this.numOfSignificantGenes = numOfSignificantGenes;
     }
-
-    public ArrayList<String> parents;
-
-    public HashSet<Gene> genesSet;
 
     public HashSet<Gene> getGenesSet() {
         return genesSet;
@@ -55,7 +69,6 @@ public class goEntry {
     public void setEnriched(boolean enriched) {
         isEnriched = enriched;
     }
-
 
     public void setRoot(boolean root) {
         this.root = root;

@@ -1,6 +1,7 @@
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 public class runGO {
@@ -54,6 +55,11 @@ public class runGO {
 
 
             reader.runOverlap(oboPath, mappingFilePath, mappingType, rootOpt, enrichFile, minSize, maxSize, overlapOut);
+
+
+
+
+
 
 
         } catch (ParseException | IOException pe) {
