@@ -71,6 +71,7 @@ public class overlap {
 
             for (String g1 : geneIDs1) {
                 for (String g2 : geneIDs2) {
+//                    System.out.println("g1: " + g1 + " || g2: " + g2);
                     if (g1.equals(g2)) {
                         sumOv++;
                     }
@@ -151,12 +152,12 @@ public class overlap {
 
     //TODO check () finished () TEST--------------------------------------------------------OUTPUT ALL FROM RESUTLT.TAR.GZ
     public static boolean checkParentsAndChildren(HashMap<String, goEntry> map, String goID1, String goID2) {
-        if (goID1.equals("GO:0006414") && goID2.equals("GO:0006412")) {
-            System.out.println("GO:0006414 parents: " + map.get(goID1).getParents());
-            System.out.println("GO:0006414 children: " + map.get(goID1).getChildren());
-            System.out.println("GO:0006412 parents: " + map.get(goID2).getParents());
-            System.out.println("GO:0006412 children: " + map.get(goID2).getChildren());
-        }
+//        if (goID1.equals("GO:0006414") && goID2.equals("GO:0006412")) {
+//            System.out.println("GO:0006414 parents: " + map.get(goID1).getParents());
+//            System.out.println("GO:0006414 children: " + map.get(goID1).getChildren());
+//            System.out.println("GO:0006412 parents: " + map.get(goID2).getParents());
+//            System.out.println("GO:0006412 children: " + map.get(goID2).getChildren());
+//        }
         if (map.containsKey(goID1)) {
             ArrayList<String> parents = map.get(goID1).getParents();
             ArrayList<String> children = map.get(goID1).getChildren();
@@ -188,66 +189,6 @@ public class overlap {
         return false;
     }
 
-
-    //TODO check () finished (x)
-//    public static boolean checkIfRelativeAscDesc(HashMap<String, goEntry> map, String goID1, String goID2) {
-//        boolean isRl = false;
-//
-//        if (map.get(goID1) != null && map.get(goID2) != null) {
-//            //TODO check direction of parents
-//            if (map.get(goID1).getParents() != null) {
-//                for (String parent : map.get(goID1).getParents()) {
-//
-//                    if (parent.equals(goID2)) {
-//                        return true;
-//                    } else if (map.get(parent) != null) {
-//                        if (!map.get(parent).isRoot()) {
-//                            checkIfRelativeAscDesc(map, parent, goID2);
-//                        }
-////                } else if (map.get(goID1).getChildren() != null) {
-////                    if (map.get(goID1).getChildren().contains(goID2)) {
-////                        return true;
-////                    }
-//                    } else {
-//                        return false;
-//                    }
-//                }
-//            }
-//            //TODO check direction of children
-//            if (map.get(goID1).getChildren() != null) {
-//                for (String child : map.get(goID1).getChildren()) {
-//                    if (child.equals(goID2)) {
-//                        return true;
-//                    } else if (map.get(child) != null) {
-//                        checkIfRelativeAscDesc(map, child, goID2);
-//                    } else {
-//                        return false;
-//                    }
-//                }
-//            }
-//
-//        }
-//
-////        if (map.get(goID2) != null && map.get(goID2).getParents() != null) {
-////            for (String parent : map.get(goID2).getParents()) {
-////                if (parent.equals(goID1)) {
-////                    return true;
-////                } else if (map.get(parent) != null) {
-////                    if (!map.get(parent).isRoot()) {
-////                        checkIfRelativeAscDesc(map, parent, goID1);
-////                    }
-////                } else if (map.get(goID2).getChildren() != null) {
-////                    if (map.get(goID2).getChildren().contains(goID1)) {
-////                        return true;
-////                    }
-////                } else {
-////                    return false;
-////                }
-////            }
-////        }
-//        return isRl;
-//    }
-
     //TODO check () finished ()
     public static void generateOverlapEntryAndPrint(HashMap<String, goEntry> map, int minsize, int maxsize, String overlapout) {
         ArrayList<overlap> overlapEntries = new ArrayList<>();
@@ -255,7 +196,9 @@ public class overlap {
             for (goEntry goEntry2 : map.values()) {
                 if (!goEntry1.equals(goEntry2)) {
                     int numOverlap = calcOverlap(goEntry1, goEntry2);
-                    if (numOverlap > 0 && numOverlap > minsize && numOverlap < maxsize) {
+                    boolean ifMinSize = goEntry1.getGenesSet().size() > minsize && goEntry2.getGenesSet().size() > minsize;
+                    boolean ifMaxSize = goEntry1.getGenesSet().size() < maxsize && goEntry2.getGenesSet().size() < maxsize;
+                    if (numOverlap > 0 && ifMinSize && ifMaxSize) {
                         overlap overlap = new overlap(goEntry1, goEntry2);
                         overlap.setNumOverlapping(numOverlap);
                         overlap.setRelative(checkParentsAndChildren(map, goEntry1.getId(), goEntry2.getId()));

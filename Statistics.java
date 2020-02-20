@@ -1,6 +1,10 @@
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
+
+import java.util.*;
 
 public class Statistics {
     //TODO check () finished ()
@@ -15,50 +19,61 @@ public class Statistics {
 //        return path_length;
 //    }
 
-    //TODO check () finished ()
-    public static void calcHgPVal() {//TODO enrichment p-value given by the hypergeometric distribution (hg_pval)
-//        return new HypergeometricDistribution().upperCumulativeProbability();
+
+    //parameter pro GoEntry: alle gene, alle signifikanten Gene, alle gene im goentry, alle sign gene im goentry
+    //TODO check () finished (x)
+    public static float calcHgPVal(int numOfAllGenes, int numOfAllSignGenes, int numOfGenesInGoEntry, int numOfSignGenesInGoEntry) {//TODO enrichment p-value given by the hypergeometric distribution (hg_pval)
+        return (float) new HypergeometricDistribution(numOfAllGenes, numOfAllSignGenes, numOfGenesInGoEntry).upperCumulativeProbability(numOfSignGenesInGoEntry);
     }
 
-
-    //TODO check () finished ()
-    public static double ksDistBasedEnrichmentValuesTest(double[] in_set_distrib, double[] bg_distrib) {//TODO with fc
-        return new KolmogorovSmirnovTest().kolmogorovSmirnovTest(in_set_distrib, bg_distrib);
+    //inset: alle logFold werte im goentry
+    //bgDist: logFold von allen gene (vllt ohne die im goentry)
+    //TODO check () finished (x)
+    public static float ksDistBasedEnrichmentValuesTest(double[] in_set_distrib, double[] bg_distrib) {//TODO with fc
+        return (float) new KolmogorovSmirnovTest().kolmogorovSmirnovTest(in_set_distrib, bg_distrib);
     }
 
-    //TODO check () finished ()
-    public static double ksDistBasedEnrichmentValuesStatistic(double[] in_set_distrib, double[] bg_distrib) {
-        return new KolmogorovSmirnovTest().kolmogorovSmirnovStatistic(in_set_distrib, bg_distrib);
+    //TODO check () finished (x)
+    public static float ksDistBasedEnrichmentValuesStatistic(double[] in_set_distrib, double[] bg_distrib) {
+        return (float) new KolmogorovSmirnovTest().kolmogorovSmirnovStatistic(in_set_distrib, bg_distrib);
     }
 
-
-    //TODO hg_fdr check () finished ()
-    public static void calcHgFdr() {//TODO  Benjamini-Hochberg corrected hg_pval
-
-    }
-
-
+    //selbe wie calchgpval nur mit minus 1
     //TODO fej_pval check () finished ()
-    public static void calcFejPVal() {//TODO enrichment p-value given by Fischer’s Exact test using jackknifing
+    public static float calcFejPVal(int numOfAllGenes, int numOfAllSignGenes, int numOfGenesInGoEntry, int numOfSignGenesInGoEntry) {//TODO enrichment p-value given by Fischer’s Exact test using jackknifing
+        return (float) new HypergeometricDistribution(numOfAllGenes - 1, numOfAllSignGenes - 1, numOfGenesInGoEntry - 1).upperCumulativeProbability(numOfSignGenesInGoEntry - 1);
 
     }
 
+    //benjamini hochberg:
+    // 1. sortieren der pvalues desc
+    // 2. n = anzahl element in list
+    // am anfang: k = n
+    // 3. durch sortierte liste gehen: fdr = pval * n / k -> minwert von fdr updaten (pro element)
+    // 4. nach jedem element: k - 1
 
-    //TODO fej_fdr check () finished ()
-    public static void calcFejFdr() {//TODO Benjamini-Hochberg corrected fej_pval
+    //TODO Benjamini Hochberg Correction check () finished ()
+    public static HashMap<String, Double> benjHochCorrPValues(HashMap<String, Double> mapOfPValues) {
+        LinkedHashMap<String, Double> pVals = mapOfPValues.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+        HashMap<String, Double> adjPValues = new HashMap<>();
 
-    }
+        Double fdRK;
+        Double minFdr = Double.MAX_VALUE;
+        int n = pVals.size();
+        int rank = n;
+        Double currentMin;
 
+        for (Map.Entry<String, Double> entry : pVals.entrySet()) {
+            fdRK = (entry.getValue() * n) / rank;
+            currentMin = minFdr;
+            if (fdRK < minFdr) {
+                minFdr = fdRK;
+            }
+            adjPValues.put(entry.getKey(), minFdr);
+            rank--;
 
-    //TODO ks_stat check () finished ()
-    public static void calcKsStat() {//TODO  the statistic value given by KS test comparing the log 2 fc dist. of the measured genes associated to the goEntry vs. the background fc dist.
-
-    }
-
-
-    //TODO ks_fdr check () finished ()
-    public static void calcKsFdr() {//TODO Benjamini-Hochberg corrected ks_pval
-
+        }
+        return adjPValues;
     }
 
 
@@ -66,5 +81,6 @@ public class Statistics {
     public static void calcShortestPathToATrue() {//TODO
 
     }
+
 
 }

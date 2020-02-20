@@ -12,11 +12,30 @@ public class goEntry {
     public ArrayList<String> children;
 
     public HashSet<Gene> genesSet;
+    public HashSet<Gene> measuredGeneSet;
     public boolean isObsolete;
-    public int measuredGenesSize;//size //TODO ()
+    public int measuredGenesSize;//size //TODO (x)
     public int numOfSignificantGenes;//noverlap //TODO (x)
 
+    public goEntry() {
 
+    }
+
+    public HashSet<Gene> getMeasuredGeneSet() {
+        return measuredGeneSet;
+    }
+
+    public void setMeasuredGeneSet(HashSet<Gene> measuredGeneSet) {
+        this.measuredGeneSet = measuredGeneSet;
+    }
+
+    //    public goEntry(String id, String name, String namespace, ArrayList<String> parents) {
+//        this.id = id;
+//        this.name = name;
+//        this.namespace = namespace;
+//        this.parents = parents;
+//        genesSet = new HashSet<>();
+//    }
 
     public ArrayList<String> getChildren() {
         return children;

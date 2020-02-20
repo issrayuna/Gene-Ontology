@@ -6,6 +6,7 @@ public class Gene {
     public double fc;
     public boolean signif;
 
+
     public HashSet<String> goEntryHashSet;
 
     public Gene(String id, double fc, boolean signif) {
@@ -16,7 +17,12 @@ public class Gene {
 
     public Gene() {
     }
-
+    //TEST
+//    public String goID;
+//    public Gene(String goID) {
+//        this.goID = goID;
+//    }
+//
     public Gene(String id, double fc, boolean signif, HashSet<String> goEntryHashSet) {
         this.id = id;
         this.fc = fc;

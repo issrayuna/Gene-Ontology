@@ -15,7 +15,9 @@ public class reader {
             }
 
             if (goEntry.getNamespace().equals(root)) {
-                n = calcNumOfMeasuredGenes(goEntry);
+
+                n = (int) calcNumOfMeasuredGenes(goEntry).get(0);
+                goEntry.setMeasuredGeneSet((HashSet<Gene>) calcNumOfMeasuredGenes(goEntry).get(1));
                 goEntry.setMeasuredGenesSize(n);
                 mapZU.put(goID, goEntry);
             }
@@ -24,16 +26,22 @@ public class reader {
     }
 
     //TODO check (x) finished (x)
-    public static int calcNumOfMeasuredGenes(goEntry goEntry) {
+    public static ArrayList<Object> calcNumOfMeasuredGenes(goEntry goEntry) {
+        ArrayList<Object> objects = new ArrayList<>();
+        HashSet<Gene> measuredGenesFC = new HashSet<>();
         int sum = 0;
         if (goEntry.getGenesSet() != null) {
             for (Gene g : goEntry.getGenesSet()) {
                 if (g.getFc() != 0) {
+                    measuredGenesFC.add(g);
                     sum++;
                 }
             }
         }
-        return sum;
+        objects.add(sum);
+        objects.add(measuredGenesFC);
+
+        return objects;
     }
 
 
@@ -78,6 +86,7 @@ public class reader {
                 g.setGoEntryHashSet(new HashSet<>(genesWithGoList.get(geneId)));
                 Gene g2 = retGeneWithSameId(genesWithFcSignif, geneId);
                 if (g2 != null) {
+//                    System.out.println("mappedGene: " + g.id + " || measuredGene: " + g2.id);
                     g.setFc(g2.getFc());
                     g.setSignif(g2.isSignif());
                 }
@@ -182,6 +191,7 @@ public class reader {
     //TODO check (x) finished (x)
     public static int calcNumOfNoverlap(HashSet<Gene> genes) {
         int sum = 0;
+
         for (Gene g : genes) {
             if (g.isSignif()) sum++;
         }
@@ -223,16 +233,18 @@ public class reader {
     }
 
     //TODO check (x) finished (x) improved () [GENERATE ONLY ONE ROOTMAP FROM THE BEGINNING????????????????? SAVES A LOT OF TIME!!!!!!!!!!!!!!!!]
-    public static HashMap<String, goEntry> generateRootMapBasedOnMappingType(String oboPath, String
+    public static rootMapWithValues generateRootMapBasedOnMappingType(String oboPath, String
             mappingFile, String mappingType, String root, String enrichFilePath) throws IOException {
 
+        rootMapWithValues rootMapWithValues = new rootMapWithValues();
 
-        ArrayList<Object> objects = readEnrichFile2(enrichFilePath);
+        ArrayList<Object> objects = readEnrichFile(enrichFilePath);
         ArrayList<String> enrichedGOs = (ArrayList<String>) objects.get(0);
         HashSet<Gene> genesWithFcSignif = (HashSet<Gene>) objects.get(1);
 
         HashMap<String, goEntry> goEntries = generateGoEntriesFromOboFile(oboPath, enrichedGOs);
         HashSet<Gene> genesWithGoLists = new HashSet<>();
+
         if (mappingType.equals("go")) {
             genesWithGoLists = generateGeneSetFromGafGO(mappingFile, genesWithFcSignif);
         } else if (mappingType.equals("ensembl")) {
@@ -246,13 +258,18 @@ public class reader {
         rootMap = returnMapWithGeneAsHashSet(rootMap);
         rootMap = overlap.addChildren(rootMap);
 
-
-        return rootMap;
+        //
+        rootMapWithValues.setRootMap(rootMap);
+        rootMapWithValues.setEnrichValues((enrichValues) objects.get(2));
+        rootMapWithValues.setNumOfAllGenes(genesWithGoLists.size());
+        return rootMapWithValues;
     }
 
     //TODO check (x) finished (x)
-    public static ArrayList<Object> readEnrichFile2(String enrichmentFilePath) throws IOException {
+    public static ArrayList<Object> readEnrichFile(String enrichmentFilePath) throws IOException {
         ArrayList<Object> objects = new ArrayList<>();
+
+        enrichValues enrichValues = new enrichValues();
 
         BufferedReader br = new BufferedReader(new FileReader(enrichmentFilePath));
         String line;
@@ -260,6 +277,7 @@ public class reader {
         ArrayList<String> enrichedGOs = new ArrayList<>();
         HashSet<Gene> genesWithFcSignif = new HashSet<>();
 
+        int numOfSignGenes = 0;
 
         while ((line = br.readLine()) != null) {
             if (line.startsWith("#")) {
@@ -267,10 +285,18 @@ public class reader {
             } else if (!line.startsWith("id")) {
                 String[] splitted = line.split("\t");
                 genesWithFcSignif.add(new Gene(splitted[0], Double.parseDouble(splitted[1]), splitted[2].equals("true")));
+                numOfSignGenes++;
             }
         }
+
         objects.add(enrichedGOs);
         objects.add(genesWithFcSignif);
+
+        //TODO
+        enrichValues.setEnrichedGoIds(new HashSet<>(enrichedGOs));
+        enrichValues.setNumOfAllSignGenes(numOfSignGenes);
+        enrichValues.setSignGenes(genesWithFcSignif);
+        objects.add(enrichValues);
 
 
         return objects;
@@ -292,10 +318,13 @@ public class reader {
     }
 
 
-    public static void runOverlap(String oboPath, String
+    public static void runOverlapAndEnrichmentAnalysis(String outPath, String oboPath, String
             mappingFile, String mappingType, String root, String enrichFilePath, int minsize, int maxsize, String overlapout) throws IOException {
-        HashMap<String, goEntry> rootMap = generateRootMapBasedOnMappingType(oboPath, mappingFile, mappingType, root, enrichFilePath);
-        overlap.generateOverlapEntryAndPrint(rootMap, minsize, maxsize, overlapout);
+        rootMapWithValues rootMapWithValues = generateRootMapBasedOnMappingType(oboPath, mappingFile, mappingType, root, enrichFilePath);
+
+//        overlap.generateOverlapEntryAndPrint(rootMapWithValues.getRootMap(), minsize, maxsize, overlapout);
+        output.generateOuputs(outPath, rootMapWithValues);
+
     }
 
 //    public static void main(String[] args) throws IOException {
